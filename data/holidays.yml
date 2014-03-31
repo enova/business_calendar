@@ -1,0 +1,38 @@
+US:
+  regions:
+    - 'us'
+  holiday_names:
+    - "New Year's Day"
+    - "Martin Luther King, Jr. Day"
+    - "Presidents' Day"
+    - "Memorial Day"
+    - "Independence Day"
+    - "Labor Day"
+    - "Columbus Day"
+    - "Veterans Day"
+    - "Thanksgiving"
+    - "Christmas Day"
+
+GB:
+  regions:
+    - 'gb'
+    - 'gb_eng'
+  holiday_names:
+    - "Good Friday"
+    - "Easter Sunday"
+    - "Easter Monday"
+    - "May Day"
+    - "Bank Holiday"
+    - "Christmas Day"
+    - "Boxing Day"
+    - "New Year's Day"
+  additions:
+    - '2002-06-04' # Summer Banking Holiday
+    - '2012-06-04'
+  removals:
+    - '2002-05-28'
+    - '2012-05-28'
+
+CN:
+  regions: []
+  holiday_names: [] #FIXME
