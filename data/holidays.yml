@@ -38,6 +38,7 @@ GB:
     - '2002-05-28'
     - '2012-05-28'
 
+# TODO: Add CN capability and holidays to holidays gem
 CN:
   regions:
     - 'cn'
