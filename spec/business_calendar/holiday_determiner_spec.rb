@@ -33,4 +33,19 @@ describe BusinessCalendar::HolidayDeterminer do
       subject.call('2101-07-05'.to_date).should be_true
     end
   end
+
+  context "with a list of additions and additions_only set to true" do
+    let(:opts) {{
+      :additions => ['2101-07-05'.to_date],
+      :additions_only => true
+    }}
+
+    it "correctly determines true for the additions" do
+      subject.call('2101-07-05'.to_date).should be_true
+    end
+
+    it "correctly determines false for dates not in additions, nor exceptions" do
+      subject.call('2101-07-04'.to_date).should be_false
+    end
+  end
 end
