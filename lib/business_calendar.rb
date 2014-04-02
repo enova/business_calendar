@@ -12,8 +12,9 @@ module BusinessCalendar
     @holiday_procs[country] ||= HolidayDeterminer.new(
        cfg["regions"], 
        cfg["holiday_names"],
-       :additions  => (cfg["additions"] || []).map { |s| Date.parse s },
-       :removals   => (cfg["removals"]  || []).map { |s| Date.parse s } )
+       :additions       => (cfg["additions"] || []).map { |s| Date.parse s },
+       :removals        => (cfg["removals"]  || []).map { |s| Date.parse s },
+       :additions_only  => cfg['additions_only'] )
   end
 
   def self.config(country)
