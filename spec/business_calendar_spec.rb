@@ -13,6 +13,12 @@ describe BusinessCalendar do
       subject.is_business_day?('2014-03-10'.to_date).should be_true
     end
 
+    specify "the nearest business days for a series of consecutive days is unique" do
+      dates = %w(2014-04-11 2014-04-12 2014-04-13 2014-04-14).map(&:to_date)
+      expected = %w(2014-04-11 2014-04-14).map(&:to_date)
+      subject.nearest_business_day(dates).should == expected
+    end
+
     specify 'the nearest business day to monday is monday in both directions' do
       subject.nearest_business_day('2014-03-10'.to_date)            .should == '2014-03-10'.to_date
       subject.nearest_business_day('2014-03-10'.to_date, :backward) .should == '2014-03-10'.to_date

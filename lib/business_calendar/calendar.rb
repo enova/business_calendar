@@ -106,6 +106,6 @@ class BusinessCalendar::Calendar
       yield thing
     end
 
-    return is_array ? results : results.first
+    return is_array ? results.uniq: results.first
   end
 end
