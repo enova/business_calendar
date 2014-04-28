@@ -99,3 +99,7 @@ CN:
     - '2015-10-07'
   additions_only: true
   holiday_names: []   # Not needed cause all holidays are via manual +additions+
+
+BR:
+  regions: []
+  holiday_names: [] #FIXME
