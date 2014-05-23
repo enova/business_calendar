@@ -101,5 +101,14 @@ CN:
   holiday_names: []   # Not needed cause all holidays are via manual +additions+
 
 BR:
-  regions: []
-  holiday_names: [] #FIXME
+  regions:
+    - 'br'
+  holiday_names: 
+    - "Dia da Confraternização Universal"
+    - "Dia de Tiradentes"
+    - "Dia do Trabalho"
+    - "Proclamação da Independência"
+    - "Dia de Nossa Senhora Aparecida"
+    - "Dia de Finados"
+    - "Proclamação da República"
+    - "Natal"
