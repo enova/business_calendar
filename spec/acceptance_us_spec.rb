@@ -42,7 +42,7 @@ describe "US holidays" do
       2018-01-01
     ).map { |x| Date.parse x }.each do |expected_holiday|
     it "treats #{expected_holiday} as a holiday" do
-      BusinessCalendar.for(:US).is_holiday?(expected_holiday).should be_true
+      expect(BusinessCalendar.for(:US).is_holiday?(expected_holiday)).to be true
     end
   end
 end
