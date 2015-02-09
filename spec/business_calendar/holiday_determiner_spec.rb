@@ -6,8 +6,8 @@ describe BusinessCalendar::HolidayDeterminer do
   subject { BusinessCalendar::HolidayDeterminer.new(regions, ["Independence Day"], opts) }
 
   it "initializes with list of regions and a list of accepted holidays" do
-    subject.regions.should == regions
-    subject.holiday_names.should == ["Independence Day"]
+    expect(subject.regions).to eq regions
+    expect(subject.holiday_names).to eq ["Independence Day"]
   end
 
   it "knows which dates are holidays" do
@@ -15,7 +15,7 @@ describe BusinessCalendar::HolidayDeterminer do
     (Date.today.year - 1 .. Date.today.year + 10).each do |year|
       fourth = Date.new year, 7, 4
       obs_date = fourth.sunday? ? fourth + 1 : (fourth.saturday? ? fourth - 1 : fourth)
-      subject.call(obs_date).should be_true
+      expect(subject.call(obs_date)).to be true
     end
   end
 
@@ -26,11 +26,11 @@ describe BusinessCalendar::HolidayDeterminer do
     }}
 
     it "correctly determines false for the exceptions" do
-      subject.call('2101-07-04'.to_date).should be_false
+      expect(subject.call('2101-07-04'.to_date)).to be false
     end
 
     it "correctly determines true for the additions" do
-      subject.call('2101-07-05'.to_date).should be_true
+      expect(subject.call('2101-07-05'.to_date)).to be true
     end
   end
 
@@ -41,11 +41,11 @@ describe BusinessCalendar::HolidayDeterminer do
     }}
 
     it "correctly determines true for the additions" do
-      subject.call('2101-07-05'.to_date).should be_true
+      expect(subject.call('2101-07-05'.to_date)).to be true
     end
 
     it "correctly determines false for dates not in additions, nor exceptions" do
-      subject.call('2101-07-04'.to_date).should be_false
+      expect(subject.call('2101-07-04'.to_date)).to be_falsy
     end
   end
 end

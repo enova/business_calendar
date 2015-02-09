@@ -20,7 +20,7 @@ describe "BR bank holidays" do
       2015-12-25
     ).map { |x| Date.parse x }.each do |expected_holiday|
     it "treats #{expected_holiday} as a holiday" do
-      BusinessCalendar.for(:BR).is_holiday?(expected_holiday).should be_true
+      expect(BusinessCalendar.for(:BR).is_holiday?(expected_holiday)).to be true
     end
   end
 
@@ -31,7 +31,7 @@ describe "BR bank holidays" do
       2014-03-04
     ).map { |x| Date.parse x }.each do |date|
     it "treats #{date} as not a holiday" do
-      BusinessCalendar.for(:BR).is_holiday?(date).should be_false
+      expect(BusinessCalendar.for(:BR).is_holiday?(date)).to be false
     end
   end
 end
