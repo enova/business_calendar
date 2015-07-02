@@ -10,6 +10,7 @@ class BusinessCalendar::Calendar
   # @param [Date] date
   # @return [Boolean] Whether or not this calendar's list of holidays includes <date>.
   def is_holiday?(date)
+    date = date.to_date if date.respond_to?(:to_date)
     holiday_determiner.call(date)
   end
 

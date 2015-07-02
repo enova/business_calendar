@@ -83,6 +83,10 @@ describe BusinessCalendar do
     specify "American Independence Day is not a business day" do
       expect(subject.is_business_day?('2014-07-04'.to_date)).to be false
     end
+
+    specify 'a time is converted to a date' do
+      expect(subject.is_holiday?(Time.parse('2014-07-04'))).to be true
+    end
   end
 
   context "in the UK" do
