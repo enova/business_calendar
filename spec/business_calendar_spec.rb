@@ -98,8 +98,8 @@ describe BusinessCalendar do
       expect(subject.is_business_day?('2014-07-04'.to_date)).to be true
     end
 
-    specify 'Boxing Day is observed on a weekday' do
-      expect(subject.is_business_day?('2015-12-28'.to_date)).to be false
+    specify 'Boxing Day is not observed on the next weekday' do
+      expect(subject.is_business_day?('2015-12-28'.to_date)).to be true
     end
   end
 
