@@ -3,7 +3,6 @@ require 'spec_helper'
 describe "US holidays" do
   %w(
     2004-01-01
-    2004-01-01
     2004-01-19
     2004-02-16
     2004-05-31
@@ -132,7 +131,9 @@ describe "US holidays" do
     2016-11-11
     2016-11-24
     2016-12-25
+    2016-12-26
     2017-01-01
+    2017-01-02
     2017-01-16
     2017-02-20
     2017-05-29
@@ -150,6 +151,7 @@ describe "US holidays" do
     2018-09-03
     2018-10-08
     2018-11-11
+    2018-11-12
     2018-11-22
     2018-12-25
     2019-01-01
@@ -177,6 +179,7 @@ describe "US holidays" do
     2021-02-15
     2021-05-31
     2021-07-04
+    2021-07-05
     2021-09-06
     2021-10-11
     2021-11-11
@@ -192,7 +195,9 @@ describe "US holidays" do
     2022-11-11
     2022-11-24
     2022-12-25
+    2022-12-26
     2023-01-01
+    2023-01-02
     2023-01-16
     2023-02-20
     2023-05-29
@@ -222,7 +227,7 @@ describe "US holidays" do
     2025-11-11
     2025-11-27
     2025-12-25
-    ).map { |x| Date.parse x }.each do |expected_holiday|
+  ).map { |x| Date.parse x }.each do |expected_holiday|
     it "treats #{expected_holiday} as a holiday" do
       expect(BusinessCalendar.for(:US).is_holiday?(expected_holiday)).to be true
     end
