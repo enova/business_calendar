@@ -1,0 +1,17 @@
+# +additions_only+ will tell business_calendar to not attempt to fetch holidays from the underlying
+# `holidays` gem, and instead only use the defined +additions+ here. Useful e.g. for cases where a
+# country is not even defined in the `holidays` gem.
+# Defaults to `false`
+
+BR:
+  regions:
+  - br
+  holiday_names:
+  - Dia da Confraternização Universal
+  - Dia de Tiradentes
+  - Dia do Trabalho
+  - Proclamação da Independência
+  - Dia de Nossa Senhora Aparecida
+  - Dia de Finados
+  - Proclamação da República
+  - Natal
