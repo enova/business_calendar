@@ -19,8 +19,14 @@ module BusinessCalendar
     end
 
     def config(country)
-      @config ||= YAML.load_file(File.join(File.dirname(File.expand_path(__FILE__)), '../data/holidays.yml'))
+      @config ||= load_config
       @config[country.to_s]
+    end
+
+    def load_config
+      files = Dir[File.join(File.dirname(File.expand_path(__FILE__)), '../data/*.yml')]
+
+      files.reduce({}) { |hash, file| hash.merge! YAML.load_file(file) }
     end
   end
 end
