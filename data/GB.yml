@@ -1,0 +1,54 @@
+# +additions_only+ will tell business_calendar to not attempt to fetch holidays from the underlying
+# `holidays` gem, and instead only use the defined +additions+ here. Useful e.g. for cases where a
+# country is not even defined in the `holidays` gem.
+# Defaults to `false`
+
+GB:
+  regions:
+  - gb
+  - gb_eng
+  holiday_names:
+  - Good Friday
+  - Easter Sunday
+  - Easter Monday
+  - May Day
+  - Bank Holiday
+  - Christmas Day
+  - Boxing Day
+  - New Year's Day
+  additions:
+  - '2002-06-04'
+  - '2011-04-29'
+  - '2012-06-04'
+  - '2012-06-05'
+  - '2012-09-22'
+  - '2012-09-23'
+  - '2015-12-26'
+  - '2016-12-25'
+  - '2017-01-01'
+  - '2020-12-26'
+  - '2021-12-25'
+  - '2021-12-26'
+  - '2022-01-01'
+  - '2022-12-25'
+  - '2023-01-01'
+  removals:
+  - '2002-05-28'
+  - '2007-04-08'
+  - '2008-03-23'
+  - '2009-04-12'
+  - '2010-04-04'
+  - '2011-04-24'
+  - '2012-04-08'
+  - '2012-05-28'
+  - '2013-03-31'
+  - '2014-04-20'
+  - '2015-12-28'
+  - '2016-12-27'
+  - '2017-01-02'
+  - '2020-12-28'
+  - '2021-12-27'
+  - '2021-12-28'
+  - '2022-01-03'
+  - '2022-12-27'
+  - '2023-01-02'
