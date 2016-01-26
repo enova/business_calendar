@@ -32,5 +32,6 @@ module BusinessCalendar
 end
 
 require 'yaml'
+require 'business_calendar/ruby18_shim' if RUBY_VERSION == '1.8.7'
 require 'business_calendar/calendar'
 require 'business_calendar/holiday_determiner'

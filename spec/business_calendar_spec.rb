@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe BusinessCalendar do
-  before { Timecop.freeze('2014-04-28'.to_date) }
+  before { allow(Date).to receive(:today).and_return('2014-04-28'.to_date) }
   subject { BusinessCalendar.for(country) }
 
   shared_examples_for "standard business time" do
