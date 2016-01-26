@@ -1,10 +1,13 @@
 require 'bundler/setup'
 Bundler.setup
 
+require 'simplecov'
+
 require 'business_calendar'
 require 'date'
 require 'timecop'
 require 'pry'
+
 
 # I'm not depending on ActiveSupport just for this.
 class String
