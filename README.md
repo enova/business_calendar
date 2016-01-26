@@ -1,4 +1,4 @@
-# BusinessCalendar [![Build Status](https://travis-ci.org/enova/business_calendar.svg)](https://travis-ci.org/enova/business_calendar)
+# BusinessCalendar [![Build Status](https://travis-ci.org/enova/business_calendar.svg)](https://travis-ci.org/enova/business_calendar) [![Coverage Status](https://coveralls.io/repos/github/enova/business_calendar/badge.svg?branch=master)](https://coveralls.io/github/enova/business_calendar?branch=master)
 
 Need to know what days you can actually debit a customer on in excruciating detail? Fed up with singleton-based gems 
 that can't handle your complex, multi-international special needs? *So* over extending core objects like Numeric
