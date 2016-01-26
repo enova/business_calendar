@@ -37,7 +37,7 @@ class BusinessCalendar::Calendar
 
     with_one_or_many(date_or_dates) do |date|
       start = nearest_business_day(date, initial_direction)
-      num.times.reduce(start) { |d| following_business_day(d) }
+      num.times.reduce(start) { |d, _| following_business_day(d) }
     end
   end
   alias :add_business_day :add_business_days
@@ -51,7 +51,7 @@ class BusinessCalendar::Calendar
     return add_business_days(date_or_dates, -num) if num < 0
 
     with_one_or_many(date_or_dates) do |date|
-      num.times.reduce(date) { |d| preceding_business_day(d) }
+      num.times.reduce(date) { |d, _| preceding_business_day(d) }
     end
   end
   alias :subtract_business_day :subtract_business_days
@@ -63,6 +63,7 @@ class BusinessCalendar::Calendar
       begin
         date = date - 1
       end until is_business_day? date
+
       date
     end
   end
@@ -85,6 +86,7 @@ class BusinessCalendar::Calendar
                   raise ArgumentError, "Invalid direction supplied: '#{direction}' should instead be :forward or :backward"
                 end
       end
+
       date
     end
   end
