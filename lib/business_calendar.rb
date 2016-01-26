@@ -32,5 +32,6 @@ module BusinessCalendar
 end
 
 require 'yaml'
+require 'business_calendar/shim'
 require 'business_calendar/calendar'
 require 'business_calendar/holiday_determiner'
