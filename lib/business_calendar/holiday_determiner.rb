@@ -17,9 +17,8 @@ class BusinessCalendar::HolidayDeterminer
     elsif removals.include? date
       false
     elsif !additions_only
-      Holidays.between(date, date, @regions, :observed)
-              .select { |h| @holiday_names.include? h[:name] }
-              .size > 0
+      Holidays.between(date, date, @regions, :observed).
+              any? { |h| @holiday_names.include? h[:name] }
     end
   end
 end
