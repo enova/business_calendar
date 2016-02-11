@@ -1,4 +1,9 @@
-# BusinessCalendar [![Build Status](https://travis-ci.org/enova/business_calendar.svg)](https://travis-ci.org/enova/business_calendar) [![Coverage Status](https://coveralls.io/repos/github/enova/business_calendar/badge.svg?branch=master)](https://coveralls.io/github/enova/business_calendar?branch=master)
+# BusinessCalendar
+
+[![Gem Version](https://badge.fury.io/rb/business_calendar.svg)](https://rubygems.org/gems/business_calendar)
+[![Build Status](https://travis-ci.org/enova/business_calendar.svg)](https://travis-ci.org/enova/business_calendar)
+[![Coverage Status](https://coveralls.io/repos/github/enova/business_calendar/badge.svg?branch=master)](https://coveralls.io/github/enova/business_calendar?branch=master)
+[![Dependency Status](https://gemnasium.com/enova/business_calendar.svg)](https://gemnasium.com/enova/business_calendar)
 
 Need to know what days you can actually debit a customer on in excruciating detail? Fed up with singleton-based gems 
 that can't handle your complex, multi-international special needs? *So* over extending core objects like Numeric
