@@ -2,7 +2,6 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - ree
   - 2.3.1
 
 script: bundle exec rspec
@@ -10,3 +9,9 @@ script: bundle exec rspec
 env:
   global:
     secure: klQ3BQNdKkGIq3Zfv8Sr6oZqaMg9GHx+LGhynQ5xt7A6SGvxbMuoXJlE9wW4me6u+B9S2D+q+pdKgGPE/+fHsVt/d0zDXRnrjVyo1eexT220AMfpjiFDAtya8sAcuuAICLhw8AmzTjns8yAWInv5U5vC6oejkLA71FXtHU//210=
+
+matrix:
+  include:
+    - rvm: ree
+      gemfile: gemfiles/ree.gemfile
+      env: TEST_SUITE=spec
