@@ -15,3 +15,11 @@ matrix:
     - rvm: ree
       gemfile: gemfiles/ree.gemfile
       env: TEST_SUITE=spec
+
+deploy:
+  provider: rubygems
+  api_key:
+    secure: "c9QcNX+nk0Yzl22ZVknZtv+/G4fUeLph0TH9PS6hQ92zywM61wtXTJExZdBHulvKAaQbKaq20LcFjLw41qwJc6tvIEYXpOinfOaiemTKaGmKscDrIi3wUAxfjmTacXZAaTdEORQVqTOmppqsuKnP7cqmSNxTSI901Sz5Cy6Jpl0="
+  on:
+    tags: true
+    repo: enova/business_calendar
