@@ -2,8 +2,12 @@ module BusinessCalendar
   CountryNotSupported = Class.new(StandardError)
   OrganizationNotSupported = Class.new(StandardError)
   class << self
-    def for(country)
-      Calendar.new(holiday_determiner(country))
+    def for(country, options = {})
+      if options["use_cached_calendar"]
+        calendar_cache[country] ||= Calendar.new(holiday_determiner(country))
+      else
+        Calendar.new(holiday_determiner(country))
+      end
     end
 
     def for_organization(org)
@@ -32,6 +36,10 @@ module BusinessCalendar
          :additions       => (cfg["additions"] || []).map { |s| Date.parse s },
          :removals        => (cfg["removals"]  || []).map { |s| Date.parse s },
          :additions_only  => cfg['additions_only'] )
+    end
+
+    def calendar_cache
+      @calendar_cache ||= {}
     end
 
     def config(country)
