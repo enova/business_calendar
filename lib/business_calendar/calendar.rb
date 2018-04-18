@@ -4,6 +4,7 @@ class BusinessCalendar::Calendar
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
   #                                holiday.
   def initialize(holiday_determiner)
+    @is_holiday = {}
     @holiday_determiner = holiday_determiner
   end
 
@@ -11,7 +12,8 @@ class BusinessCalendar::Calendar
   # @return [Boolean] Whether or not this calendar's list of holidays includes <date>.
   def is_holiday?(date)
     date = date.send(:to_date) if date.respond_to?(:to_date, true)
-    holiday_determiner.call(date)
+    return @is_holiday[date] unless @is_holiday[date].nil?
+    @is_holiday[date] = holiday_determiner.call(date)
   end
 
   # @param [Date]     date
