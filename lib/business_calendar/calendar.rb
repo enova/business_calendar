@@ -36,8 +36,9 @@ class BusinessCalendar::Calendar
     return subtract_business_days(date_or_dates, -num) if num < 0
 
     with_one_or_many(date_or_dates) do |date|
-      start = nearest_business_day(date, initial_direction)
-      num.times.reduce(start) { |d, _| following_business_day(d) }
+      d = nearest_business_day(date, initial_direction)
+      num.times { d = following_business_day(d) }
+      d
     end
   end
   alias :add_business_day :add_business_days
@@ -51,7 +52,8 @@ class BusinessCalendar::Calendar
     return add_business_days(date_or_dates, -num) if num < 0
 
     with_one_or_many(date_or_dates) do |date|
-      num.times.reduce(date) { |d, _| preceding_business_day(d) }
+      num.times { date = preceding_business_day(date) }
+      date
     end
   end
   alias :subtract_business_day :subtract_business_days
@@ -102,13 +104,12 @@ class BusinessCalendar::Calendar
 
   private
   def with_one_or_many(thing_or_things)
-    is_array = thing_or_things.is_a? Enumerable
-    things = is_array ? thing_or_things : [thing_or_things]
-
-    results = things.collect do |thing|
-      yield thing
+    if thing_or_things.is_a? Enumerable
+      thing_or_things.collect do |thing|
+        yield thing
+      end
+    else
+      yield thing_or_things
     end
-
-    return is_array ? results : results.first
   end
 end
