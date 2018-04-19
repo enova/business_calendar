@@ -4,6 +4,7 @@ class BusinessCalendar::Calendar
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
   #                                holiday.
   def initialize(holiday_determiner)
+    @is_holiday = {}
     @holiday_determiner = holiday_determiner
   end
 
@@ -11,7 +12,8 @@ class BusinessCalendar::Calendar
   # @return [Boolean] Whether or not this calendar's list of holidays includes <date>.
   def is_holiday?(date)
     date = date.send(:to_date) if date.respond_to?(:to_date, true)
-    holiday_determiner.call(date)
+    return @is_holiday[date] unless @is_holiday[date].nil?
+    @is_holiday[date] = holiday_determiner.call(date)
   end
 
   # @param [Date]     date
@@ -36,8 +38,9 @@ class BusinessCalendar::Calendar
     return subtract_business_days(date_or_dates, -num) if num < 0
 
     with_one_or_many(date_or_dates) do |date|
-      start = nearest_business_day(date, initial_direction)
-      num.times.reduce(start) { |d, _| following_business_day(d) }
+      d = nearest_business_day(date, initial_direction)
+      num.times { d = following_business_day(d) }
+      d
     end
   end
   alias :add_business_day :add_business_days
@@ -51,7 +54,8 @@ class BusinessCalendar::Calendar
     return add_business_days(date_or_dates, -num) if num < 0
 
     with_one_or_many(date_or_dates) do |date|
-      num.times.reduce(date) { |d, _| preceding_business_day(d) }
+      num.times { date = preceding_business_day(date) }
+      date
     end
   end
   alias :subtract_business_day :subtract_business_days
@@ -102,13 +106,12 @@ class BusinessCalendar::Calendar
 
   private
   def with_one_or_many(thing_or_things)
-    is_array = thing_or_things.is_a? Enumerable
-    things = is_array ? thing_or_things : [thing_or_things]
-
-    results = things.collect do |thing|
-      yield thing
+    if thing_or_things.is_a? Enumerable
+      thing_or_things.collect do |thing|
+        yield thing
+      end
+    else
+      yield thing_or_things
     end
-
-    return is_array ? results : results.first
   end
 end
