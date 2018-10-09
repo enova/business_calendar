@@ -1,10 +1,14 @@
 class BusinessCalendar::Calendar
+  # Set timeout to 5 min (300 s)
+  TIMEOUT = 300
+
   attr_reader :holiday_determiner
 
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
   #                                holiday.
-  def initialize(holiday_determiner)
-    @is_holiday = {}
+  def initialize(holiday_determiner, options = {})
+    @options = options
+    @holiday_cache = {}
     @holiday_determiner = holiday_determiner
   end
 
@@ -12,8 +16,10 @@ class BusinessCalendar::Calendar
   # @return [Boolean] Whether or not this calendar's list of holidays includes <date>.
   def is_holiday?(date)
     date = date.send(:to_date) if date.respond_to?(:to_date, true)
-    return @is_holiday[date] unless @is_holiday[date].nil?
-    @is_holiday[date] = holiday_determiner.call(date)
+
+    clear_cache if @options["timed_cache"]
+
+    @holiday_cache[date] ||= holiday_determiner.call(date)
   end
 
   # @param [Date]     date
@@ -112,6 +118,13 @@ class BusinessCalendar::Calendar
       end
     else
       yield thing_or_things
+    end
+  end
+
+  def clear_cache
+    if !@issued_at || (Time.now - @issued_at) >= TIMEOUT
+      @issued_at = Time.now
+      @holiday_cache = {}
     end
   end
 end
