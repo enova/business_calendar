@@ -1,3 +1,6 @@
+require 'faraday'
+require 'faraday/conductivity'
+
 module BusinessCalendar
   CountryNotSupported = Class.new(StandardError)
   OrganizationNotSupported = Class.new(StandardError)
@@ -12,6 +15,10 @@ module BusinessCalendar
 
     def for_organization(org)
       Calendar.new(holiday_determiner_for_organization(org))
+    end
+
+    def for_endpoint(endpoint, options = {})
+      Calendar.new(holiday_determiner_for_endpoint(endpoint), {"timed_cache" => true})
     end
 
     private
@@ -36,6 +43,19 @@ module BusinessCalendar
          :additions       => (cfg["additions"] || []).map { |s| Date.parse s },
          :removals        => (cfg["removals"]  || []).map { |s| Date.parse s },
          :additions_only  => cfg['additions_only'] )
+    end
+
+    def holiday_determiner_for_endpoint(endpoint)
+      Proc.new do |date|
+        client = Faraday.new do |conn|
+          conn.response :selective_errors
+          conn.adapter :net_http
+        end
+
+        dates = JSON.parse(client.get(endpoint).body).fetch('holidays')
+
+        dates.include?(date.iso8601)
+      end
     end
 
     def calendar_cache

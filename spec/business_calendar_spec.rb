@@ -110,4 +110,57 @@ describe BusinessCalendar do
       expect { subject }.to raise_error BusinessCalendar::CountryNotSupported
     end
   end
+
+  context "with an API endpoint", focus: true do
+    let(:endpoint) { 'http://fake_endpoint.test' }
+    subject { BusinessCalendar.for_endpoint(endpoint) }
+
+    it_behaves_like "standard business time"
+
+    before do
+      stub_request(:get, endpoint).to_return(
+        status: 200,
+        body: {'holidays' => ['2014-07-04', '2014-07-05']}.to_json
+      )
+    end
+
+    it 'hits the configured endpoint for each new call' do
+      subject.is_business_day?('2014-07-03'.to_date)
+      subject.is_business_day?('2014-07-04'.to_date)
+      subject.is_holiday?('2014-07-06'.to_date)
+
+      expect(a_request(:get, endpoint)).to have_been_made.times(3)
+    end
+
+    it 'caches holidays for 5 min' do
+      Timecop.freeze(Time.now)
+
+      subject.is_business_day?('2014-07-04'.to_date)
+      subject.is_business_day?('2014-07-04'.to_date)
+
+      expect(a_request(:get, endpoint)).to have_been_made.times(1)
+
+      Timecop.freeze(Time.now + 301)
+
+      subject.is_business_day?('2014-07-04'.to_date)
+
+      expect(a_request(:get, endpoint)).to have_been_made.times(2)
+    end
+
+    context 'http request fails' do
+      before { stub_request(:get, endpoint).to_return(status: 500) }
+
+      it 'raises an error' do
+        expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::ClientError
+      end
+    end
+
+    specify "date included in endpoint's holiday list is not a business day" do
+      expect(subject.is_business_day?('2014-07-05'.to_date)).to be false
+    end
+
+    specify 'a time is converted to a date' do
+      expect(subject.is_holiday?(Time.parse('2014-07-04'))).to be true
+    end
+  end
 end

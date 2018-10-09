@@ -61,6 +61,26 @@ holiday_tester = Proc.new { |date| MY_HOLIDAY_DATES.include? date }
 bc = BusinessCalendar::Calendar.new(holiday_tester)
 ```
 
+You can also create an API that returns a list of holidays, and point BusinessCalendar to the API.
+
+The API needs to respond to an `HTTP GET` with status `200` and a JSON response with field `holidays` containing a list of ISO 8601 string dates:
+
+```json
+{
+  "holidays": [
+    "2018-10-08",
+    "2018-11-12",
+    "2018-11-22"
+  ]
+}
+```
+
+```ruby
+bc = BusinessCalendar.for_endpoint('https://some.test/calendars/2018')
+```
+
+If used with an API to get holiday data, holiday dates are cached for 5 minutes. This is so that changes to the data being returned by the API will not necessitate restarting every application/process that uses BusinessCalendar with that API.
+
 ## Contributing
 
 1. Fork it
