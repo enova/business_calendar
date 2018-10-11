@@ -18,7 +18,16 @@ class BusinessCalendar::HolidayDeterminer
       false
     elsif !additions_only
       Holidays.between(date, date, @regions, :observed).
-              any? { |h| @holiday_names.include? h[:name] }
+        any? { |h| @holiday_names.include? h[:name] }
     end
+  end
+
+  private
+  def additions
+    @additions.is_a?(Proc) ? @additions.call : @additions
+  end
+
+  def removals
+    @removals.is_a?(Proc) ? @removals.call : @removals
   end
 end

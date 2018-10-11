@@ -75,11 +75,20 @@ The API needs to respond to an `HTTP GET` with status `200` and a JSON response 
 }
 ```
 
-```ruby
-bc = BusinessCalendar.for_endpoint('https://some.test/calendars/2018')
-```
+With this option, holiday dates are *temporarily* cached (with a default ttl of 300s). This is so that changes to the data being returned by the API will not necessitate restarting every application/process that uses BusinessCalendar with that API.
 
-If used with an API to get holiday data, holiday dates are cached for 5 minutes. This is so that changes to the data being returned by the API will not necessitate restarting every application/process that uses BusinessCalendar with that API.
+Usage:
+
+```ruby
+# additions = URI to hit for dates to be added to holiday list. Set to nil if none
+# removals  = URI to hit for dates to be removed from holiday list. Set to nil if none
+#
+# opts      = Set same config options (regions, holiday_names, additions_only)
+#             as the YAML files, with the additional option "ttl" to set ttl on
+#             cached dates. Defaults to 300s.
+
+bc = BusinessCalendar.for_endpoint('https://some.test/calendars/2018', 'https://some.test/calendars/2018_removals')
+```
 
 ## Contributing
 
