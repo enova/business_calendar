@@ -112,24 +112,33 @@ describe BusinessCalendar do
   end
 
   context "with an API endpoint", focus: true do
-    let(:endpoint) { 'http://fake_endpoint.test' }
-    subject { BusinessCalendar.for_endpoint(endpoint) }
+    let(:additions) { 'http://fakeendpoint.test/additions' }
+    let(:removals) { 'http://fakeendpoint.test/removals' }
+
+    subject { BusinessCalendar.for_endpoint(additions, removals) }
 
     it_behaves_like "standard business time"
 
     before do
-      stub_request(:get, endpoint).to_return(
+      stub_request(:get, additions).to_return(
         status: 200,
         body: {'holidays' => ['2014-07-04', '2014-07-05']}.to_json
       )
+
+      stub_request(:get, removals).to_return(
+        status: 200,
+        body: {'holidays' => ['2014-12-24', '2014-12-25']}.to_json
+      )
     end
 
-    it 'hits the configured endpoint for each new call' do
+    it 'hits the configured endpoint for each call to an addition or removal' do
       subject.is_business_day?('2014-07-03'.to_date)
       subject.is_business_day?('2014-07-04'.to_date)
       subject.is_holiday?('2014-07-06'.to_date)
+      subject.is_holiday?('2014-12-24'.to_date)
 
-      expect(a_request(:get, endpoint)).to have_been_made.times(3)
+      expect(a_request(:get, additions)).to have_been_made.times(4)
+      expect(a_request(:get, removals)).to have_been_made.times(3)
     end
 
     it 'caches holidays for 5 min' do
@@ -138,17 +147,17 @@ describe BusinessCalendar do
       subject.is_business_day?('2014-07-04'.to_date)
       subject.is_business_day?('2014-07-04'.to_date)
 
-      expect(a_request(:get, endpoint)).to have_been_made.times(1)
+      expect(a_request(:get, additions)).to have_been_made.times(1)
 
       Timecop.freeze(Time.now + 301)
 
       subject.is_business_day?('2014-07-04'.to_date)
 
-      expect(a_request(:get, endpoint)).to have_been_made.times(2)
+      expect(a_request(:get, additions)).to have_been_made.times(2)
     end
 
     context 'http request fails' do
-      before { stub_request(:get, endpoint).to_return(status: 500) }
+      before { stub_request(:get, additions).to_return(status: 500) }
 
       it 'raises an error' do
         expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::ClientError

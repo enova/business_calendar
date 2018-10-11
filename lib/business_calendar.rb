@@ -17,8 +17,9 @@ module BusinessCalendar
       Calendar.new(holiday_determiner_for_organization(org))
     end
 
-    def for_endpoint(endpoint, options = {})
-      Calendar.new(holiday_determiner_for_endpoint(endpoint), {"timed_cache" => true})
+    def for_endpoint(additions, removals, opts = {})
+      ttl = opts["ttl"] || 300
+      Calendar.new(holiday_determiner_for_endpoint(additions, removals, opts), {"ttl" => ttl})
     end
 
     private
@@ -45,17 +46,27 @@ module BusinessCalendar
          :additions_only  => cfg['additions_only'] )
     end
 
-    def holiday_determiner_for_endpoint(endpoint)
-      Proc.new do |date|
-        client = Faraday.new do |conn|
-          conn.response :selective_errors
-          conn.adapter :net_http
-        end
-
-        dates = JSON.parse(client.get(endpoint).body).fetch('holidays')
-
-        dates.include?(date.iso8601)
+    def holiday_determiner_for_endpoint(additions_endpoint, removals_endpoint, opts)
+      client = Faraday.new do |conn|
+        conn.response :selective_errors
+        conn.adapter :net_http
       end
+
+      additions = if additions_endpoint
+                    Proc.new { JSON.parse(client.get(additions_endpoint).body).fetch('holidays').map { |s| Date.parse s } }
+                  end
+
+      removals = if removals_endpoint
+                   Proc.new { JSON.parse(client.get(removals_endpoint).body).fetch('holidays').map { |s| Date.parse s } }
+                 end
+
+      HolidayDeterminer.new(
+        opts["regions"] || [],
+        opts["holiday_names"] || [],
+        :additions       => additions,
+        :removals        => removals,
+        :additions_only  => opts["additions_only"] || []
+      )
     end
 
     def calendar_cache

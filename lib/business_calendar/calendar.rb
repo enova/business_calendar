@@ -1,7 +1,4 @@
 class BusinessCalendar::Calendar
-  # Set timeout to 5 min (300 s)
-  TIMEOUT = 300
-
   attr_reader :holiday_determiner
 
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
@@ -17,7 +14,7 @@ class BusinessCalendar::Calendar
   def is_holiday?(date)
     date = date.send(:to_date) if date.respond_to?(:to_date, true)
 
-    clear_cache if @options["timed_cache"]
+    clear_cache if @options["ttl"]
 
     @holiday_cache[date] ||= holiday_determiner.call(date)
   end
@@ -122,7 +119,7 @@ class BusinessCalendar::Calendar
   end
 
   def clear_cache
-    if !@issued_at || (Time.now - @issued_at) >= TIMEOUT
+    if !@issued_at || (Time.now - @issued_at) >= @options["ttl"]
       @issued_at = Time.now
       @holiday_cache = {}
     end
