@@ -1,7 +1,0 @@
-source 'https://rubygems.org'
-
-gem 'rake', '< 11'
-gem 'json', '< 2'
-gem 'pry', '< 0.10'
-
-gemspec :path => '../'
