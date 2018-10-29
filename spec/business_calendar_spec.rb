@@ -75,10 +75,58 @@ describe BusinessCalendar do
     end
   end
 
+  shared_examples_for "weekends as business days" do
+    specify "a weekend is a business day" do
+      expect(subject.is_business_day?('2014-03-09'.to_date)).to be true
+    end
+
+    specify "a normal weekday is a business day" do
+      expect(subject.is_business_day?('2014-03-10'.to_date)).to be true
+    end
+
+    specify 'the nearest business day to a saturday in any direction is saturday' do
+      expect(subject.nearest_business_day('2014-03-08'.to_date)).to eq '2014-03-08'.to_date
+      expect(subject.nearest_business_day('2014-03-08'.to_date, :forward)).to eq '2014-03-08'.to_date
+      expect(subject.nearest_business_day('2014-03-08'.to_date, :backward)).to eq '2014-03-08'.to_date
+    end
+
+    specify 'one business day added to a friday is saturday' do
+      expect(subject.add_business_day('2014-03-07'.to_date)).to eq '2014-03-08'.to_date
+    end
+
+    specify 'one business day added to a weekend is the next day' do
+      expect(subject.add_business_day('2014-03-08'.to_date)).to eq '2014-03-09'.to_date
+      expect(subject.add_business_day('2014-03-09'.to_date)).to eq '2014-03-10'.to_date
+    end
+
+    specify 'the following business day of a saturday is sunday' do
+      expect(subject.following_business_day('2014-03-08'.to_date)).to eq '2014-03-09'.to_date
+    end
+
+    specify 'a saturday plus zero business days is still saturday' do
+      expect(subject.add_business_days('2014-03-08'.to_date, 0)).to eq '2014-03-08'.to_date
+      expect(subject.add_business_days('2014-03-08'.to_date, 0, :backward)).to eq '2014-03-08'.to_date
+    end
+
+    specify 'the preceding business day of a monday is sunday' do
+      expect(subject.preceding_business_day('2014-03-10'.to_date)).to eq '2014-03-09'.to_date
+    end
+
+    specify 'a monday less three business days is the previous friday' do
+      expect(subject.add_business_days('2014-03-10'.to_date, -3)).to eq '2014-03-07'.to_date
+    end
+  end
+
   context "in the US" do
     let(:country) { :US }
 
     it_behaves_like "standard business time"
+
+    context "with weekends as business days" do
+      subject { BusinessCalendar.for(country, {"business_weekends" => true}) }
+
+      it_behaves_like "weekends as business days"
+    end
 
     specify "American Independence Day is not a business day" do
       expect(subject.is_business_day?('2014-07-04'.to_date)).to be false
@@ -93,6 +141,12 @@ describe BusinessCalendar do
     let(:country) { :GB }
 
     it_behaves_like "standard business time"
+
+    context "with weekends as business days" do
+      subject { BusinessCalendar.for(country, {"business_weekends" => true}) }
+
+      it_behaves_like "weekends as business days"
+    end
 
     specify "American Independence Day is a business day" do
       expect(subject.is_business_day?('2014-07-04'.to_date)).to be true
@@ -117,8 +171,6 @@ describe BusinessCalendar do
 
     subject { BusinessCalendar.for_endpoint(additions, removals) }
 
-    it_behaves_like "standard business time"
-
     before do
       stub_request(:get, additions).to_return(
         status: 200,
@@ -129,6 +181,14 @@ describe BusinessCalendar do
         status: 200,
         body: {'holidays' => ['2014-12-24', '2014-12-25']}.to_json
       )
+    end
+
+    it_behaves_like "standard business time"
+
+    context "with weekends as business days" do
+      subject { BusinessCalendar.for_endpoint(additions, removals, {"business_weekends" => true}) }
+
+      it_behaves_like "weekends as business days"
     end
 
     it 'hits the configured endpoint for each call to an addition or removal' do

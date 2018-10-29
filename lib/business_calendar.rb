@@ -9,17 +9,17 @@ module BusinessCalendar
       if options["use_cached_calendar"]
         calendar_cache[country] ||= Calendar.new(holiday_determiner(country))
       else
-        Calendar.new(holiday_determiner(country))
+        Calendar.new(holiday_determiner(country), options)
       end
     end
 
-    def for_organization(org)
-      Calendar.new(holiday_determiner_for_organization(org))
+    def for_organization(org, options = {})
+      Calendar.new(holiday_determiner_for_organization(org), options)
     end
 
-    def for_endpoint(additions, removals, opts = {})
-      ttl = opts["ttl"] || 300
-      Calendar.new(holiday_determiner_for_endpoint(additions, removals, opts), {"ttl" => ttl})
+    def for_endpoint(additions, removals, options = {})
+      ttl = options["ttl"] || 300
+      Calendar.new(holiday_determiner_for_endpoint(additions, removals, options), options.merge({"ttl" => ttl}))
     end
 
     private

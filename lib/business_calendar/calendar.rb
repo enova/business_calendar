@@ -22,7 +22,7 @@ class BusinessCalendar::Calendar
   # @param [Date]     date
   # @return [Boolean] Whether or not banking can be done on <date>.
   def is_business_day?(date)
-    return false if date.saturday? || date.sunday?
+    return false if !@options["business_weekends"] && (date.saturday? || date.sunday?)
     return false if is_holiday?(date)
     true
   end
