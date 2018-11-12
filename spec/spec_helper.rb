@@ -6,7 +6,6 @@ require 'simplecov'
 require 'business_calendar'
 require 'date'
 require 'webmock/rspec'
-require 'timecop'
 require 'pry'
 
 # I'm not depending on ActiveSupport just for this.

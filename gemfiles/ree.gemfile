@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+gem 'addressable', '< 2.4.0'
+gem 'json',        '< 2'
+gem 'faraday',     '< 0.10'
+gem 'hashdiff',    '0.3.0'
+gem 'pry',         '< 0.10'
+
+# Specify your gem's dependencies in business_calendar.gemspec
+gemspec :path => '../'
