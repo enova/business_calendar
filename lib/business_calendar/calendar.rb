@@ -1,9 +1,12 @@
-class BusinessCalendar::Calendar
+require 'business_calendar/cacheable'
+
+class BusinessCalendar::Calendar < BusinessCalendar::Cacheable
   attr_reader :holiday_determiner
 
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
   #                                holiday.
   def initialize(holiday_determiner, options = {})
+    super(options['ttl'])
     @options = options
     @holiday_cache = {}
     @holiday_determiner = holiday_determiner
@@ -14,7 +17,7 @@ class BusinessCalendar::Calendar
   def is_holiday?(date)
     date = date.send(:to_date) if date.respond_to?(:to_date, true)
 
-    clear_cache if @options["ttl"]
+    clear_cache if should_clear_cache?
 
     @holiday_cache[date] ||= holiday_determiner.call(date)
   end
@@ -22,7 +25,7 @@ class BusinessCalendar::Calendar
   # @param [Date]     date
   # @return [Boolean] Whether or not banking can be done on <date>.
   def is_business_day?(date)
-    return false if !@options["business_weekends"] && (date.saturday? || date.sunday?)
+    return false if !@options['business_weekends'] && (date.saturday? || date.sunday?)
     return false if is_holiday?(date)
     true
   end
@@ -108,6 +111,17 @@ class BusinessCalendar::Calendar
   end
 
   private
+
+  def should_clear_cache?
+    # this is a heuristic to prevent cache growing arbitrarily large
+    super || @holiday_cache.size > 365 * 3
+  end
+
+  def clear_cache
+    super
+    @holiday_cache = {}
+  end
+
   def with_one_or_many(thing_or_things)
     if thing_or_things.is_a? Enumerable
       thing_or_things.collect do |thing|
@@ -115,13 +129,6 @@ class BusinessCalendar::Calendar
       end
     else
       yield thing_or_things
-    end
-  end
-
-  def clear_cache
-    if !@issued_at || (Time.now - @issued_at) >= @options["ttl"]
-      @issued_at = Time.now
-      @holiday_cache = {}
     end
   end
 end

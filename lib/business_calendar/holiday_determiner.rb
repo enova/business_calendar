@@ -1,9 +1,11 @@
 require 'holidays'
+require 'business_calendar/cacheable'
 
-class BusinessCalendar::HolidayDeterminer
+class BusinessCalendar::HolidayDeterminer < BusinessCalendar::Cacheable
   attr_reader :regions, :holiday_names, :additions, :removals, :additions_only
 
   def initialize(regions, holiday_names, opts = {})
+    super(opts[:ttl])
     @regions        = regions
     @holiday_names  = holiday_names
     @additions      = opts[:additions]      || []
@@ -12,6 +14,8 @@ class BusinessCalendar::HolidayDeterminer
   end
 
   def call(date)
+    clear_cache if should_clear_cache?
+
     if additions.include? date
       true
     elsif removals.include? date
@@ -23,11 +27,18 @@ class BusinessCalendar::HolidayDeterminer
   end
 
   private
+
+  def clear_cache
+    super
+    @additions_cache = nil
+    @removals_cache = nil
+  end
+
   def additions
-    @additions.is_a?(Proc) ? @additions.call : @additions
+    @additions_cache ||= @additions.is_a?(Proc) ? @additions.call : @additions
   end
 
   def removals
-    @removals.is_a?(Proc) ? @removals.call : @removals
+    @removals_cache ||= @removals.is_a?(Proc) ? @removals.call : @removals
   end
 end
