@@ -1,12 +1,12 @@
-require 'business_calendar/cacheable'
-
-class BusinessCalendar::Calendar < BusinessCalendar::Cacheable
+class BusinessCalendar::Calendar
+  DEFAULT_TIME_TO_LIVE = 24 * 60 * 60
   attr_reader :holiday_determiner
 
   # @param [Proc[Date -> Boolean]] a proc which returns whether or not a date is a
   #                                holiday.
   def initialize(holiday_determiner, options = {})
-    super(options['ttl'])
+    ttl = options['ttl']
+    @time_to_live = ttl.nil? ? DEFAULT_TIME_TO_LIVE : ttl
     @options = options
     @holiday_cache = {}
     @holiday_determiner = holiday_determiner
@@ -113,12 +113,14 @@ class BusinessCalendar::Calendar < BusinessCalendar::Cacheable
   private
 
   def should_clear_cache?
-    # this is a heuristic to prevent cache growing arbitrarily large
-    super || @holiday_cache.size > 365 * 3
+    return false unless @time_to_live
+
+    # limit size using a heuristic, to prevent cache growing arbitrarily large
+    !@last_cleared || (Time.now - @last_cleared) >= @time_to_live || @holiday_cache.size > 365 * 3
   end
 
   def clear_cache
-    super
+    @last_cleared = Time.now
     @holiday_cache = {}
   end
 
