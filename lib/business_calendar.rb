@@ -18,8 +18,7 @@ module BusinessCalendar
     end
 
     def for_endpoint(additions, removals, options = {})
-      ttl = options["ttl"] || 300
-      Calendar.new(holiday_determiner_for_endpoint(additions, removals, options), options.merge({"ttl" => ttl}))
+      Calendar.new(holiday_determiner_for_endpoint(additions, removals, options), options)
     end
 
     private
@@ -46,6 +45,10 @@ module BusinessCalendar
          :additions_only  => cfg['additions_only'] )
     end
 
+    def holiday_dates_for_endpoint(client, endpoint)
+      Proc.new { JSON.parse(client.get(endpoint).body).fetch('holidays').map { |s| Date.parse s } }
+    end
+
     def holiday_determiner_for_endpoint(additions_endpoint, removals_endpoint, opts)
       client = Faraday.new do |conn|
         conn.response :selective_errors
@@ -53,11 +56,11 @@ module BusinessCalendar
       end
 
       additions = if additions_endpoint
-                    Proc.new { JSON.parse(client.get(additions_endpoint).body).fetch('holidays').map { |s| Date.parse s } }
+                    holiday_dates_for_endpoint(client, additions_endpoint)
                   end
 
       removals = if removals_endpoint
-                   Proc.new { JSON.parse(client.get(removals_endpoint).body).fetch('holidays').map { |s| Date.parse s } }
+                   holiday_dates_for_endpoint(client, removals_endpoint)
                  end
 
       HolidayDeterminer.new(
@@ -65,7 +68,8 @@ module BusinessCalendar
         opts["holiday_names"] || [],
         :additions       => additions,
         :removals        => removals,
-        :additions_only  => opts["additions_only"] || []
+        :additions_only  => opts["additions_only"] || [],
+        :ttl => opts['ttl']
       )
     end
 

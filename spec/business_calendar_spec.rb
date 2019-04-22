@@ -191,31 +191,175 @@ describe BusinessCalendar do
       it_behaves_like "weekends as business days"
     end
 
-    it 'hits the configured endpoint for each call to an addition or removal' do
+    it 'hits the configured endpoint and then reuses the cached result' do
+      subject.is_business_day?('2014-07-03'.to_date)
       subject.is_business_day?('2014-07-03'.to_date)
       subject.is_business_day?('2014-07-04'.to_date)
       subject.is_holiday?('2014-07-06'.to_date)
+      subject.is_holiday?('2014-07-06'.to_date)
       subject.is_holiday?('2014-12-24'.to_date)
 
-      expect(a_request(:get, additions)).to have_been_made.times(4)
-      expect(a_request(:get, removals)).to have_been_made.times(3)
+      expect(a_request(:get, additions)).to have_been_made.times(1)
+      expect(a_request(:get, removals)).to have_been_made.times(1)
     end
 
-    it 'caches holidays for 5 min' do
-      start = Time.now
+    context 'after 24 hours without specifying a Time to Live override' do
+      subject { BusinessCalendar.for_endpoint(additions, removals) }
+      let!(:start) { Time.now }
+      let!(:one_day) { 86400 }
 
-      allow(Time).to receive(:now) { start }
+      it 'expires the holidays cache' do
+        allow(Time).to receive(:now) { start }
 
-      subject.is_business_day?('2014-07-04'.to_date)
-      subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-01-01'.to_date)
 
-      expect(a_request(:get, additions)).to have_been_made.times(1)
+        # initial request was made
+        expect(a_request(:get, additions)).to have_been_made.times(1)
 
-      allow(Time).to receive(:now) { start + 301 }
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
 
-      subject.is_business_day?('2014-07-04'.to_date)
+        # cache from initial request was still used
+        expect(a_request(:get, additions)).to have_been_made.times(1)
 
-      expect(a_request(:get, additions)).to have_been_made.times(2)
+        # 24 hours + 1 second have passed
+        # cache should be cleared and fresh API request made
+        allow(Time).to receive(:now) { start + one_day + 1 }
+
+        subject.is_business_day?('2014-01-01'.to_date)
+
+        # 2nd request was made
+        expect(a_request(:get, additions)).to have_been_made.times(2)
+
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+
+        # 2nd request is now cached, so no new request should have been issued
+        expect(a_request(:get, additions)).to have_been_made.times(2)
+      end
+    end
+
+    context 'turning off Time to Live functionality' do
+      subject { BusinessCalendar.for_endpoint(additions, removals, {'ttl' => false}) }
+      let!(:start) { Time.now }
+      let!(:one_day) { 86400 }
+
+      it 'will never clear the cache' do
+        allow(Time).to receive(:now) { start }
+
+        subject.is_business_day?('2014-01-01'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        allow(Time).to receive(:now) { start + 301 }
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        allow(Time).to receive(:now) { start + one_day + 1 }
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+      end
+    end
+
+    context 'setting Time to Live override to zero' do
+      subject { BusinessCalendar.for_endpoint(additions, removals, {'ttl' => 0}) }
+      let!(:start) { Time.now }
+
+      it 'will always clear the cache' do
+        allow(Time).to receive(:now) { start }
+
+        subject.is_holiday?('2014-01-01'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        allow(Time).to receive(:now) { start + 301 }
+
+        subject.is_holiday?('2014-01-01'.to_date)
+        subject.is_holiday?('2014-07-04'.to_date)
+        subject.is_holiday?('2014-07-04'.to_date)
+        subject.is_holiday?('2014-11-28'.to_date)
+
+        expect(a_request(:get, additions)).to have_been_made.times(5)
+
+        subject.is_holiday?('2014-01-01'.to_date)
+        subject.is_holiday?('2014-01-01'.to_date)
+        subject.is_holiday?('2014-07-04'.to_date)
+        subject.is_holiday?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(9)
+      end
+    end
+
+    context 'using a 5 minute Time to Live override' do
+      subject { BusinessCalendar.for_endpoint(additions, removals, {'ttl' => 300}) }
+      let!(:start) { Time.now }
+
+      it 'expires the holidays cache after the specified time has elapsed' do
+        allow(Time).to receive(:now) { start }
+
+        # initial request made and cached
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        # 120 seconds pass, cache should still be used
+        allow(Time).to receive(:now) { start + 120 }
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        # 301 seconds pass, cache is expired and 2nd request made
+        allow(Time).to receive(:now) { start + 301 }
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(2)
+
+        # 2nd request is now cached, so no new request should have been issued
+        subject.is_business_day?('2014-01-01'.to_date)
+        subject.is_business_day?('2014-07-04'.to_date)
+        subject.is_business_day?('2014-11-28'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(2)
+      end
+    end
+
+    context 'with a few years in dates filling the cache' do
+      let!(:start) { Time.now }
+
+      # NOTE: this test cheats a bit to test class internals / implementation
+      it 'will clear out the holiday cache but keep the cached API result' do
+        allow(Time).to receive(:now) { start }
+        subject.is_business_day?('2014-07-04'.to_date)
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+        (2014..2017).each do |year|
+          (1..12).each do |month|
+            (1..28).each do |day|
+              subject.is_business_day?("#{year}-#{month}-#{day}".to_date)
+            end
+          end
+        end
+
+        # about to reach cache size threshold
+        expect(subject.instance_variable_get('@holiday_cache').size).to be(960)
+
+        (1..7).each do |month|
+          (1..28).each do |day|
+            subject.is_business_day?("#2018-#{month}-#{day}".to_date)
+          end
+        end
+
+        # now holiday cache will have been cleared and should be small again
+        expect(subject.instance_variable_get('@holiday_cache').size).to be(4)
+
+        # and cached API response was still used
+        expect(a_request(:get, additions)).to have_been_made.times(1)
+      end
     end
 
     context 'http request fails' do

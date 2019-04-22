@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe BusinessCalendar::HolidayDeterminer do
   let(:regions) { [ :us ] }
-  let(:opts)    {{}}
+  let(:opts)    { {} }
   subject { BusinessCalendar::HolidayDeterminer.new(regions, ["Independence Day"], opts) }
 
   it "initializes with list of regions and a list of accepted holidays" do
