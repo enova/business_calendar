@@ -1,5 +1,4 @@
 require 'faraday'
-require 'faraday/conductivity'
 
 module BusinessCalendar
   CountryNotSupported = Class.new(StandardError)
@@ -51,7 +50,7 @@ module BusinessCalendar
 
     def holiday_determiner_for_endpoint(additions_endpoint, removals_endpoint, opts)
       client = Faraday.new do |conn|
-        conn.response :selective_errors
+        conn.response :raise_error
         conn.adapter :net_http
       end
 

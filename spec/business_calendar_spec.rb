@@ -366,7 +366,7 @@ describe BusinessCalendar do
       before { stub_request(:get, additions).to_return(:status => 500) }
 
       it 'raises an error' do
-        expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::ClientError
+        expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::Error
       end
     end
 
