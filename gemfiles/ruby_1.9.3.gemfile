@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'json', '< 2.3.0'
+
+# Specify your gem's dependencies in business_calendar.gemspec
+gemspec :path => '../'
