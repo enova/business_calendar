@@ -9,6 +9,7 @@ matrix:
       script: bundle exec rspec
     - rvm: 1.9.3
       script: bundle exec rspec
+      gemfile: gemfiles/ruby_1.9.3.gemfile
     - rvm: 2.3.1
       script: bundle exec rspec
 
