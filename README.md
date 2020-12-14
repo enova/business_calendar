@@ -30,7 +30,7 @@ Instantiate a calendar object with:
 bc = BusinessCalendar.for(:US)
 ```
 
-This will automatically load holidays based on the US banking holiday schedule, as configured in `data/holidays.yml`. 
+This will automatically load holidays based on the US banking holiday schedule, as configured in `data/US.yml`.
 Currently, this gem supports `:GB` and `:US` regions.
 
 Now, you can use it:
