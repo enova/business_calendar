@@ -1,8 +1,6 @@
 require 'bundler/setup'
 Bundler.setup
 
-require 'simplecov'
-
 require 'business_calendar'
 require 'date'
 require 'webmock/rspec'
