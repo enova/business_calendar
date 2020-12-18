@@ -20,12 +20,12 @@ describe "GB bank holidays" do
       2015-12-26
       2016-12-25
       2017-01-01
-      2020-12-26
-      2021-12-25
-      2021-12-26
-      2022-01-01
-      2022-12-25
-      2023-01-01
+      2020-12-28
+      2021-12-27
+      2021-12-28
+      2022-01-03
+      2022-12-27
+      2023-01-02
     ).map { |x| Date.parse x }.each do |expected_holiday|
     it "treats #{expected_holiday} as a holiday" do
       expect(BusinessCalendar.for(:GB).is_holiday?(expected_holiday)).to be true
@@ -35,12 +35,12 @@ describe "GB bank holidays" do
   %w(
       2012-05-28
       2015-12-28
-      2020-12-28
-      2021-12-27
-      2021-12-28
-      2022-01-03
-      2022-12-27
-      2023-01-02
+      2020-12-26
+      2021-12-25
+      2021-12-26
+      2022-01-01
+      2022-12-25
+      2023-01-01
     ).map { |x| Date.parse x }.each do |date|
     it "treats #{date} as not a holiday" do
       expect(BusinessCalendar.for(:GB).is_holiday?(date)).to be false
