@@ -1,5 +1,10 @@
 # business_calendar changes by version
 
+2.0.0
+---------
+
+- Remove UK weekend holidays, replace with the actual observed holiday dates [#26]
+
 1.1.0
 ---------
 
