@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["rnubel@enova.com"]
   spec.description   = %q{Helper gem for dealing with business days and date adjustment in multiple countries.}
   spec.summary       = %q{Country-aware business-date logic and handling.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/enova/business_calendar"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
