@@ -2,7 +2,7 @@ require 'holidays'
 
 class BusinessCalendar::HolidayDeterminer
   DEFAULT_TIME_TO_LIVE = 24 * 60 * 60
-  attr_reader :regions, :holiday_names, :additions, :removals, :additions_only
+  attr_reader :regions, :holiday_names, :additions_only
 
   def initialize(regions, holiday_names, opts = {})
     ttl = opts[:ttl]
@@ -27,6 +27,14 @@ class BusinessCalendar::HolidayDeterminer
     end
   end
 
+  def additions
+    @additions_cache ||= @additions.is_a?(Proc) ? @additions.call : @additions
+  end
+
+  def removals
+    @removals_cache ||= @removals.is_a?(Proc) ? @removals.call : @removals
+  end
+
   private
 
   def should_clear_cache?
@@ -39,13 +47,5 @@ class BusinessCalendar::HolidayDeterminer
     @last_cleared = Time.now
     @additions_cache = nil
     @removals_cache = nil
-  end
-
-  def additions
-    @additions_cache ||= @additions.is_a?(Proc) ? @additions.call : @additions
-  end
-
-  def removals
-    @removals_cache ||= @removals.is_a?(Proc) ? @removals.call : @removals
   end
 end
