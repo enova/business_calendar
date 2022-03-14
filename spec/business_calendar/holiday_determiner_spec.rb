@@ -47,5 +47,9 @@ describe BusinessCalendar::HolidayDeterminer do
     it "correctly determines false for dates not in additions, nor exceptions" do
       expect(subject.call('2101-07-04'.to_date)).to be_falsy
     end
+
+    it "lists out the additions" do
+      expect(subject.additions).to include('2101-07-05'.to_date)
+    end
   end
 end
