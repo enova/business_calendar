@@ -35,6 +35,13 @@ class BusinessCalendar::HolidayDeterminer
     @removals_cache ||= @removals.is_a?(Proc) ? @removals.call : @removals
   end
 
+  def preload
+    clear_cache
+    additions
+    removals
+    self
+  end
+
   private
 
   def should_clear_cache?

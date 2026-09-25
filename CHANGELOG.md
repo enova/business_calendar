@@ -1,5 +1,14 @@
 # business_calendar changes by version
 
+Unreleased
+---------
+
+- Add `for_endpoint!`, a fail-fast variant of `for_endpoint` that eagerly
+  fetches the additions/removals endpoint data and raises
+  `BusinessCalendar::HolidayDataUnavailable` immediately if either endpoint
+  returns a nil or empty holiday list. `for_endpoint` itself is unchanged and
+  still silently treats every date as non-holiday in that case.
+
 2.0.0
 ---------
 

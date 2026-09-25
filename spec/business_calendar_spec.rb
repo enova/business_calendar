@@ -203,6 +203,32 @@ describe BusinessCalendar do
       expect(a_request(:get, removals)).to have_been_made.times(1)
     end
 
+    context 'using for_endpoint!' do
+      subject { BusinessCalendar.for_endpoint!(additions, removals) }
+
+      it 'does not raise, and returns a working calendar when both endpoints return holiday data' do
+        expect { subject }.not_to raise_error
+        expect(subject.is_business_day?('2014-07-04'.to_date)).to be false
+        expect(subject.is_business_day?('2014-07-03'.to_date)).to be true
+      end
+
+      context 'only the additions endpoint is given' do
+        subject { BusinessCalendar.for_endpoint!(additions, nil) }
+
+        it 'does not raise, since the removals endpoint was never requested' do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      context 'only the removals endpoint is given' do
+        subject { BusinessCalendar.for_endpoint!(nil, removals) }
+
+        it 'does not raise, since the additions endpoint was never requested' do
+          expect { subject }.not_to raise_error
+        end
+      end
+    end
+
     context 'after 24 hours without specifying a Time to Live override' do
       subject { BusinessCalendar.for_endpoint(additions, removals) }
       let!(:start) { Time.now }
@@ -365,8 +391,128 @@ describe BusinessCalendar do
     context 'http request fails' do
       before { stub_request(:get, additions).to_return(:status => 500) }
 
-      it 'raises an error' do
-        expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::Error
+      context 'using for_endpoint' do
+        it 'raises an error lazily, on first use' do
+          expect { subject.is_business_day?('2014-07-04'.to_date) }.to raise_error Faraday::Error
+        end
+      end
+
+      context 'using for_endpoint!' do
+        it 'raises an error eagerly, on construction' do
+          expect { BusinessCalendar.for_endpoint!(additions, removals) }.to raise_error Faraday::Error
+        end
+      end
+    end
+
+    context 'endpoint returns an empty holiday list' do
+      before do
+        stub_request(:get, additions).to_return(
+          :status => 200,
+          :body => {'holidays' => []}.to_json
+        )
+      end
+
+      context 'using for_endpoint' do
+        it 'does not raise, and silently treats every day as a business day (for backwards compatibility)' do
+          expect(subject.is_business_day?('2014-07-04'.to_date)).to be true
+        end
+      end
+
+      context 'using for_endpoint!' do
+        subject { BusinessCalendar.for_endpoint!(additions, removals) }
+
+        it 'raises HolidayDataUnavailable instead of silently treating every day as a business day' do
+          expect { subject }.
+            to raise_error(BusinessCalendar::HolidayDataUnavailable, /http:\/\/fakeendpoint\.test\/additions/)
+        end
+      end
+    end
+
+    context 'endpoint returns an empty holiday list after a successful initial fetch' do
+      subject { BusinessCalendar.for_endpoint!(additions, removals, 'ttl' => 0) }
+
+      before do
+        stub_request(:get, additions).
+          to_return({:status => 200, :body => {'holidays' => ['2014-07-04']}.to_json},
+                    {:status => 200, :body => {'holidays' => []}.to_json})
+      end
+
+      it 'fetches each endpoint once at construction and raises on the refresh' do
+        expect { subject }.not_to raise_error
+        expect(a_request(:get, additions)).to have_been_made.once
+        expect { subject.is_holiday?('2014-07-04'.to_date) }.
+          to raise_error(BusinessCalendar::HolidayDataUnavailable)
+      end
+    end
+
+    context 'endpoint returns a null holiday list' do
+      before do
+        stub_request(:get, additions).to_return(
+          :status => 200,
+          :body => {'holidays' => nil}.to_json
+        )
+      end
+
+      context 'using for_endpoint' do
+        it 'does not raise, and silently treats every day as a business day (for backwards compatibility)' do
+          expect(subject.is_business_day?('2014-07-04'.to_date)).to be true
+        end
+      end
+
+      context 'using for_endpoint!' do
+        subject { BusinessCalendar.for_endpoint!(additions, removals) }
+
+        it 'raises HolidayDataUnavailable' do
+          expect { subject }.to raise_error(BusinessCalendar::HolidayDataUnavailable)
+        end
+      end
+    end
+
+    context 'removals endpoint returns an empty holiday list' do
+      before do
+        stub_request(:get, removals).to_return(
+          :status => 200,
+          :body => {'holidays' => []}.to_json
+        )
+      end
+
+      context 'using for_endpoint' do
+        it 'does not raise, since for_endpoint treats a missing removals list like an empty one (for backwards compatibility)' do
+          expect { subject.is_business_day?('2014-12-24'.to_date) }.not_to raise_error
+        end
+      end
+
+      context 'using for_endpoint!' do
+        subject { BusinessCalendar.for_endpoint!(additions, removals) }
+
+        it 'raises HolidayDataUnavailable instead of silently treating every day as a non-removed day' do
+          expect { subject }.
+            to raise_error(BusinessCalendar::HolidayDataUnavailable, /http:\/\/fakeendpoint\.test\/removals/)
+        end
+      end
+    end
+
+    context 'removals endpoint returns a null holiday list' do
+      before do
+        stub_request(:get, removals).to_return(
+          :status => 200,
+          :body => {'holidays' => nil}.to_json
+        )
+      end
+
+      context 'using for_endpoint' do
+        it 'does not raise, since for_endpoint treats a missing removals list like an empty one (for backwards compatibility)' do
+          expect { subject.is_business_day?('2014-12-24'.to_date) }.not_to raise_error
+        end
+      end
+
+      context 'using for_endpoint!' do
+        subject { BusinessCalendar.for_endpoint!(additions, removals) }
+
+        it 'raises HolidayDataUnavailable' do
+          expect { subject }.
+            to raise_error(BusinessCalendar::HolidayDataUnavailable, /http:\/\/fakeendpoint\.test\/removals/)
+        end
       end
     end
 

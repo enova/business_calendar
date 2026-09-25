@@ -52,4 +52,29 @@ describe BusinessCalendar::HolidayDeterminer do
       expect(subject.additions).to include('2101-07-05'.to_date)
     end
   end
+
+  describe "#preload" do
+    let(:additions_calls) { [] }
+    let(:removals_calls)  { [] }
+    let(:opts) {{
+      :additions => Proc.new { additions_calls << 1; ['2101-07-05'.to_date] },
+      :removals  => Proc.new { removals_calls << 1; [] }
+    }}
+
+    it "fetches each list once and does not refetch on the first call" do
+      subject.preload
+      subject.call('2101-07-05'.to_date)
+
+      expect(additions_calls.size).to eq 1
+      expect(removals_calls.size).to eq 1
+    end
+
+    it "refetches once the ttl has expired" do
+      subject.preload
+      allow(Time).to receive(:now).and_return(Time.now + BusinessCalendar::HolidayDeterminer::DEFAULT_TIME_TO_LIVE + 1)
+      subject.call('2101-07-05'.to_date)
+
+      expect(additions_calls.size).to eq 2
+    end
+  end
 end
